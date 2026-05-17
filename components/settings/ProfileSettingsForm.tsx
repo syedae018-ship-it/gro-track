@@ -109,7 +109,7 @@ export function ProfileSettingsForm({ profile, userId, userEmail }: ProfileSetti
     <div className="flex flex-col gap-5">
 
       {/* ── Avatar Card ── */}
-      <div className="bg-[#0f0f14] border border-white/8 rounded-2xl p-6">
+      <div className="glass-card p-5 sm:p-6">
         <h2 className="text-sm font-bold text-white/60 uppercase tracking-wider mb-5 flex items-center gap-2">
           <Camera className="w-4 h-4" /> Profile Photo
         </h2>
@@ -203,7 +203,7 @@ export function ProfileSettingsForm({ profile, userId, userEmail }: ProfileSetti
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
 
         {/* Personal Info */}
-        <div className="bg-[#0f0f14] border border-white/8 rounded-2xl p-6">
+        <div className="glass-card p-5 sm:p-6">
           <h2 className="text-sm font-bold text-white/60 uppercase tracking-wider mb-5 flex items-center gap-2">
             <User className="w-4 h-4" /> Personal Information
           </h2>
@@ -243,7 +243,7 @@ export function ProfileSettingsForm({ profile, userId, userEmail }: ProfileSetti
         </div>
 
         {/* Payment Details */}
-        <div className="bg-[#0f0f14] border border-white/8 rounded-2xl p-6">
+        <div className="glass-card p-5 sm:p-6">
           <h2 className="text-sm font-bold text-white/60 uppercase tracking-wider mb-1 flex items-center gap-2">
             <CreditCard className="w-4 h-4" /> Payment Details
           </h2>
@@ -286,7 +286,7 @@ export function ProfileSettingsForm({ profile, userId, userEmail }: ProfileSetti
         </div>
 
         {/* Notes (for admins editing their own notes) */}
-        <div className="bg-[#0f0f14] border border-white/8 rounded-2xl p-6">
+        <div className="glass-card p-5 sm:p-6">
           <h2 className="text-sm font-bold text-white/60 uppercase tracking-wider mb-4">Notes</h2>
           <textarea
             name="notes"
@@ -311,7 +311,7 @@ export function ProfileSettingsForm({ profile, userId, userEmail }: ProfileSetti
         <button
           type="submit"
           disabled={saving}
-          className={`flex items-center justify-center gap-2 h-11 rounded-xl text-sm font-bold transition-all ${
+          className={`flex items-center justify-center gap-2 min-h-[48px] h-12 w-full rounded-xl text-sm font-bold transition-all touch-target ${
             saved
               ? "bg-emerald-600 text-white"
               : "bg-gradient-to-r from-violet-600 to-blue-600 hover:opacity-90 text-white shadow-lg shadow-violet-500/20"

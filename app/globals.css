@@ -33,10 +33,18 @@
     --ring: 257 100% 68% / 0.45;
 
     --radius: 1.25rem; /* 20px */
+
+    /* Safe area insets for notch devices */
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left: env(safe-area-inset-left, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
   }
 
   * {
     @apply border-border;
+    /* Prevent accidental text selection on interactive elements */
+    -webkit-tap-highlight-color: transparent;
   }
   
   body {
@@ -45,11 +53,24 @@
     color-scheme: dark;
     selection: bg-primary/30 text-primary-foreground;
     scroll-behavior: smooth;
-    /* Soft noise texture could be applied here if we had an asset, keeping it clean for now */
+    /* Prevent pull-to-refresh on mobile */
+    overscroll-behavior: none;
+    /* Prevent zoom on iOS double-tap */
+    touch-action: manipulation;
   }
   
   h1, h2, h3, h4, h5, h6 {
     @apply text-foreground;
+  }
+
+  /* Responsive typography scale */
+  html {
+    font-size: 16px;
+  }
+  @media (max-width: 375px) {
+    html {
+      font-size: 14px;
+    }
   }
 }
 
@@ -78,12 +99,52 @@
   .text-neon {
     @apply text-primary drop-shadow-[0_0_12px_rgba(168,85,247,0.6)];
   }
+
+  /* Mobile-safe horizontal scroll container */
+  .mobile-scroll-x {
+    @apply overflow-x-auto overscroll-x-contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+  }
+  .mobile-scroll-x::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+  }
+
+  /* Safe area padding utilities */
+  .pt-safe { padding-top: env(safe-area-inset-top, 0px); }
+  .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); }
+  .pl-safe { padding-left: env(safe-area-inset-left, 0px); }
+  .pr-safe { padding-right: env(safe-area-inset-right, 0px); }
+
+  /* Touch-friendly minimum tap target */
+  .touch-target {
+    @apply min-w-[44px] min-h-[44px];
+  }
+
+  /* Full-screen mobile modal utility */
+  .mobile-fullscreen {
+    @apply fixed inset-0 z-50;
+  }
+  @media (min-width: 640px) {
+    .mobile-fullscreen {
+      position: relative;
+      inset: auto;
+      z-index: auto;
+    }
+  }
 }
 
 /* Custom scrollbar for webkit - Luxury Minimalist */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
+}
+
+@media (max-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 3px;
+    height: 3px;
+  }
 }
 
 ::-webkit-scrollbar-track {
@@ -97,4 +158,10 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(139, 92, 246, 0.4);
+}
+
+/* Smooth momentum scrolling for overflow containers */
+.overflow-y-auto,
+.overflow-x-auto {
+  -webkit-overflow-scrolling: touch;
 }

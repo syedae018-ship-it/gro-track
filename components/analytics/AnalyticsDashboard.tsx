@@ -268,7 +268,7 @@ export const AnalyticsDashboard = React.memo(function AnalyticsDashboard({ emplo
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-start justify-center p-4 pt-8 overflow-y-auto"
+            className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-end sm:items-start justify-center sm:p-4 sm:pt-8 overflow-y-auto"
             onClick={(e) => { if (e.target === e.currentTarget) setSelectedEmployee(null) }}
           >
             <motion.div
@@ -276,20 +276,20 @@ export const AnalyticsDashboard = React.memo(function AnalyticsDashboard({ emplo
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 16, scale: 0.97 }}
               transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="bg-[#0e0e13] border border-white/8 rounded-3xl w-full max-w-4xl shadow-2xl shadow-black/60 overflow-hidden mb-8"
+              className="bg-[#0e0e13] border border-white/8 rounded-t-3xl sm:rounded-3xl w-full max-w-4xl shadow-2xl shadow-black/60 overflow-hidden mb-0 sm:mb-8"
             >
               {/* Modal Header */}
-              <div className="flex items-center justify-between px-6 py-5 border-b border-white/5">
-                <div className="flex items-center gap-3">
+              <div className="flex items-center gap-6 py-5 border-b border-white/5 px-6">
+                <div className="flex items-center gap-3 flex-1 min-w-0 flex-wrap">
                   <Avatar initials={empDetail.emp.full_name} src={empDetail.emp.avatar_url} size="md" />
                   <div>
                     <h2 className="font-syne font-bold text-white text-lg">{empDetail.emp.full_name}</h2>
-                    <p className="text-xs text-white/40">{ROLE_LABELS[empDetail.emp.role] || empDetail.emp.role} · Analytics Dashboard</p>
+                    <p className="text-xs text-white/40">{ROLE_LABELS[empDetail.emp.role] || empDetail.emp.role} · Analytics</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
                   {/* Filter Tabs */}
-                  <div className="flex gap-1 bg-white/5 border border-white/8 rounded-xl p-1">
+                  <div className="flex gap-1 bg-white/5 border border-white/8 rounded-xl p-1 overflow-x-auto">
                     {(["7", "30", "60", "90", "all"] as FilterRange[]).map(f => (
                       <button
                         key={f}
@@ -348,7 +348,7 @@ export const AnalyticsDashboard = React.memo(function AnalyticsDashboard({ emplo
                 </div>
 
                 {/* Charts Row */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
 
                   {/* Monthly Earnings Line Chart */}
                   <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-5">

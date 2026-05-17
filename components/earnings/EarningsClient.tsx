@@ -266,6 +266,7 @@ ${employeeName}`
               <h2 className="font-semibold text-white text-sm">Completed Tasks</h2>
               <p className="text-[11px] text-white/40 mt-0.5">Tasks you've completed and their payout status.</p>
             </div>
+            <div className="mobile-scroll-x">
             <div className="divide-y divide-white/5 max-h-[500px] overflow-y-auto">
               {filteredTasks.length === 0 ? (
                 <div className="py-12 flex flex-col items-center justify-center text-white/30">
@@ -305,6 +306,7 @@ ${employeeName}`
                   </motion.div>
                 ))
               )}
+            </div>
             </div>
           </div>
         </div>
@@ -368,12 +370,13 @@ ${employeeName}`
       {/* Payout Modal */}
       <AnimatePresence>
         {isModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/60 backdrop-blur-md">
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="bg-surface backdrop-blur-[20px] border border-primary/30 rounded-3xl w-full max-w-md shadow-purple-bloom overflow-hidden"
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 40 }}
+              transition={{ type: "spring", damping: 28, stiffness: 300 }}
+              className="bg-surface backdrop-blur-[20px] border border-primary/30 rounded-t-3xl sm:rounded-3xl w-full sm:max-w-md shadow-purple-bloom overflow-hidden pb-[env(safe-area-inset-bottom,0px)]"
             >
               <div className="p-6 border-b border-white/5">
                 <h2 className="text-lg font-syne font-bold text-white">Request Payout</h2>

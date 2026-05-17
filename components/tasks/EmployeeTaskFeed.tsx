@@ -126,7 +126,7 @@ export const EmployeeTaskFeed = memo(function EmployeeTaskFeed({ tasks: initialT
   return (
     <div className="flex flex-col gap-5 w-full pb-28">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <h1 className="text-xl font-bold text-white tracking-tight">
             {firstName}&apos;s Tasks {pendingTasks.length > 0 ? "🎯" : "✨"}
@@ -137,7 +137,7 @@ export const EmployeeTaskFeed = memo(function EmployeeTaskFeed({ tasks: initialT
         </div>
         <button
           onClick={() => setShowAnalytics(v => !v)}
-          className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-xl border transition-all ${
+          className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-xl border transition-all min-h-[36px] ${
             showAnalytics
               ? "text-violet-300 bg-violet-500/15 border-violet-500/30"
               : "text-white/40 bg-white/5 border-white/10 hover:text-white/70"
@@ -293,7 +293,8 @@ export const EmployeeTaskFeed = memo(function EmployeeTaskFeed({ tasks: initialT
         whileHover={{ scale: 1.07 }}
         whileTap={{ scale: 0.94 }}
         onClick={() => setShowAddModal(true)}
-        className="fixed bottom-8 right-8 w-13 h-13 w-[52px] h-[52px] rounded-2xl bg-gradient-to-br from-violet-600 to-blue-600 text-white shadow-2xl shadow-violet-500/25 flex items-center justify-center z-40 hover:shadow-violet-500/40 transition-shadow"
+        style={{ bottom: `max(2rem, calc(env(safe-area-inset-bottom, 0px) + 1.5rem))` }}
+        className="fixed right-5 sm:right-8 w-[52px] h-[52px] rounded-2xl bg-gradient-to-br from-violet-600 to-blue-600 text-white shadow-2xl shadow-violet-500/25 flex items-center justify-center z-40 hover:shadow-violet-500/40 transition-shadow active:scale-95"
       >
         <Plus className="w-5 h-5" />
       </motion.button>

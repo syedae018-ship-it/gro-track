@@ -62,7 +62,7 @@ export const EmployeeDashboard = React.memo(function EmployeeDashboard(props: Em
       </div>
 
       {/* Task Status Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
         {useMemo(() => [
           { label: "In Progress", value: props.inProgress, icon: Zap, color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20" },
           { label: "In Review", value: props.inReview, icon: Eye, color: "text-yellow-400", bg: "bg-yellow-500/10", border: "border-yellow-500/20" },
@@ -89,7 +89,7 @@ export const EmployeeDashboard = React.memo(function EmployeeDashboard(props: Em
       </div>
 
       {/* Earnings + Turnaround */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
         {/* Earnings Card */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -117,7 +117,7 @@ export const EmployeeDashboard = React.memo(function EmployeeDashboard(props: Em
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="text-center p-4 rounded-xl glass-card">
               <p className="text-2xl font-syne font-bold text-foreground">{formatINR(safeNum(props.totalEarnings))}</p>
               <p className="text-[11px] text-muted-foreground mt-1">Total Earnings</p>
@@ -186,7 +186,7 @@ export const EmployeeDashboard = React.memo(function EmployeeDashboard(props: Em
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
-        className="bg-white/[0.02] border border-white/5 rounded-xl overflow-hidden"
+        className="bg-white/[0.02] border border-white/5 rounded-xl overflow-hidden w-full"
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/5">
           <h2 className="font-semibold text-white">My Active Tasks</h2>

@@ -96,9 +96,9 @@ export function PaymentsDashboard({ payouts }: PaymentsDashboardProps) {
   return (
     <>
       {/* ── Filter Bar ── */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3">
         {/* Status pills */}
-        <div className="flex gap-1.5 bg-white/[0.03] border border-white/5 p-1 rounded-xl">
+        <div className="flex gap-1.5 bg-white/[0.03] border border-white/5 p-1 rounded-xl overflow-x-auto mobile-scroll-x w-full sm:w-auto">
           {(["all", "pending", "paid"] as const).map(s => (
             <button
               key={s}
@@ -135,7 +135,7 @@ export function PaymentsDashboard({ payouts }: PaymentsDashboardProps) {
       </div>
 
       {/* ── KPI Cards ── */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0 }}
           className="bg-[#0f1a13] border border-emerald-500/20 rounded-2xl p-5 relative overflow-hidden">
           <div className="absolute inset-0 bg-emerald-500/3" />
@@ -195,8 +195,9 @@ export function PaymentsDashboard({ payouts }: PaymentsDashboardProps) {
 
       {/* ── Payout Table ── */}
       <div className="bg-[#0d0d12] border border-white/5 rounded-2xl overflow-hidden">
+        <div className="mobile-scroll-x">
         {/* Table Header */}
-        <div className="grid grid-cols-[2fr_2fr_1fr_1.5fr_1.5fr_1fr_1fr] px-4 py-3 border-b border-white/5 gap-4">
+        <div className="grid grid-cols-[2fr_2fr_1fr_1.5fr_1.5fr_1fr_1fr] px-4 py-3 border-b border-white/5 gap-4 min-w-[700px]">
           {["Employee", "Clients", "Tasks", "Requested", "Paid On", "Amount", "Status"].map(h => (
             <span key={h} className="text-[9px] font-bold uppercase tracking-widest text-white/25">{h}</span>
           ))}
@@ -228,7 +229,7 @@ export function PaymentsDashboard({ payouts }: PaymentsDashboardProps) {
                   animate={{ opacity: 1 }}
                   transition={{ delay: i * 0.03 }}
                   onClick={() => setSelectedPayout(payout)}
-                  className="w-full grid grid-cols-[2fr_2fr_1fr_1.5fr_1.5fr_1fr_1fr] px-4 py-3.5 gap-4 hover:bg-white/[0.03] transition-colors text-left group items-center"
+                  className="w-full grid grid-cols-[2fr_2fr_1fr_1.5fr_1.5fr_1fr_1fr] px-4 py-3.5 gap-4 hover:bg-white/[0.03] transition-colors text-left group items-center min-w-[700px]"
                 >
                   {/* Employee */}
                   <div className="flex items-center gap-2.5 min-w-0">
@@ -290,6 +291,7 @@ export function PaymentsDashboard({ payouts }: PaymentsDashboardProps) {
             })}
           </div>
         )}
+        </div>{/* mobile-scroll-x */}
       </div>
 
       {/* ── Payout Detail Modal ── */}
@@ -299,7 +301,7 @@ export function PaymentsDashboard({ payouts }: PaymentsDashboardProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-start justify-center p-4 pt-10 overflow-y-auto"
+            className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-end sm:items-start justify-center sm:p-4 sm:pt-10 overflow-y-auto"
             onClick={e => { if (e.target === e.currentTarget) setSelectedPayout(null) }}
           >
             <motion.div

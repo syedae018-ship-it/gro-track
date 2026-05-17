@@ -91,7 +91,7 @@ export const AdminDashboard = React.memo(function AdminDashboard(props: AdminDas
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
         {cards.map((card, i) => {
           const Icon = card.icon
           return (
@@ -100,7 +100,7 @@ export const AdminDashboard = React.memo(function AdminDashboard(props: AdminDas
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05, duration: 0.3 }}
-              className={`glass-card p-5 flex flex-col gap-3 relative overflow-hidden group hover:-translate-y-1`}
+              className={`glass-card p-4 sm:p-5 flex flex-col gap-3 relative overflow-hidden group hover:-translate-y-1`}
             >
               <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full blur-[40px] opacity-20 group-hover:opacity-40 transition-all" style={{background: `var(--tw-gradient-from, #8b5cff)`}} />
               <div className={`w-9 h-9 rounded-full ${card.bg} border ${card.border} flex items-center justify-center ${card.color} shadow-luxury-glow`}>
@@ -116,7 +116,7 @@ export const AdminDashboard = React.memo(function AdminDashboard(props: AdminDas
       </div>
 
       {/* Tasks breakdown + Recent tasks */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Task Pipeline */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -181,13 +181,13 @@ export const AdminDashboard = React.memo(function AdminDashboard(props: AdminDas
                       <p className="text-sm font-medium text-white/80 truncate group-hover:text-white transition-colors">{task.title}</p>
                       {isOverdue && <AlertTriangle className="w-3 h-3 text-red-400 shrink-0" />}
                     </div>
-                    <div className="flex items-center gap-2 text-[11px] text-white/30">
-                      <span>{task.client?.name || 'No client'}</span>
-                      {task.assignee?.full_name && <><span>·</span><span>{task.assignee.full_name}</span></>}
+                    <div className="flex items-center gap-1.5 text-[11px] text-white/30 flex-wrap">
+                      <span className="truncate max-w-[120px] sm:max-w-none">{task.client?.name || 'No client'}</span>
+                      {task.assignee?.full_name && <><span>·</span><span className="hidden sm:inline">{task.assignee.full_name}</span></>}
                       {task.deadline && <><span>·</span><span className={isOverdue ? 'text-red-400' : ''}>{new Date(task.deadline).toLocaleDateString()}</span></>}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
                     {task.payment_amount > 0 && (
                       <span className="text-xs font-bold text-emerald-400 drop-shadow-[0_0_6px_rgba(52,211,153,0.5)]">{formatINR(safeNum(task.payment_amount))}</span>
                     )}
