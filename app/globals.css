@@ -1,0 +1,100 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 260 86% 3%; /* #05010D deep dark purple */
+    --foreground: 260 100% 97%; /* #F5F3FF */
+
+    --card: 260 80% 8%; /* #120424 */
+    --card-foreground: 260 100% 97%;
+
+    --popover: 260 80% 8%;
+    --popover-foreground: 260 100% 97%;
+
+    --primary: 257 100% 68%; /* #8B5CFF */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 271 91% 65%; /* #A855F7 */
+    --secondary-foreground: 275 98% 85%; /* #D8B4FE */
+
+    --muted: 265 80% 12%; /* #1B0635 */
+    --muted-foreground: 260 30% 60%; /* #8E7AB5 */
+
+    --accent: 257 100% 68%; /* #8B5CFF */
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 271 91% 65% / 0.22; /* rgba(168,85,247,0.22) */
+    --input: 260 80% 12% / 0.6;
+    --ring: 257 100% 68% / 0.45;
+
+    --radius: 1.25rem; /* 20px */
+  }
+
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-[#b8a9d9] font-sans antialiased;
+    /* Force dark mode */
+    color-scheme: dark;
+    selection: bg-primary/30 text-primary-foreground;
+    scroll-behavior: smooth;
+    /* Soft noise texture could be applied here if we had an asset, keeping it clean for now */
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply text-foreground;
+  }
+}
+
+@layer utilities {
+  .glass-card {
+    @apply bg-surface border border-border backdrop-blur-[18px] rounded-xl transition-all duration-500 shadow-glass-panel;
+  }
+  
+  .will-change-scroll {
+    will-change: scroll-position, contents;
+    transform: translateZ(0); /* Hardware acceleration */
+  }
+  
+  .glass-card:hover {
+    @apply border-primary/40 shadow-purple-bloom -translate-y-1;
+  }
+
+  .glass-panel {
+    @apply bg-elevated/80 border border-border backdrop-blur-xl rounded-xl shadow-cinematic;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-primary;
+  }
+  
+  .text-neon {
+    @apply text-primary drop-shadow-[0_0_12px_rgba(168,85,247,0.6)];
+  }
+}
+
+/* Custom scrollbar for webkit - Luxury Minimalist */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #060606;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 92, 246, 0.4);
+}
