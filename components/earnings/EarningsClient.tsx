@@ -38,10 +38,17 @@ interface EarningsClientProps {
 
 type DateFilter = "30 Days" | "60 Days" | "90 Days" | "All Time"
 
-export function EarningsClient({ initialTasks, initialPayouts, employeeName, employeeEmail, employeeId }: EarningsClientProps) {
-  const [tasks, setTasks] = useState<Task[]>(initialTasks)
-  const [payouts, setPayouts] = useState<Payout[]>(initialPayouts)
+export function EarningsClient({ initialTasks = [], initialPayouts = [], employeeName, employeeEmail, employeeId }: EarningsClientProps) {
+  const [tasks, setTasks] = useState<Task[]>(initialTasks || [])
+  const [payouts, setPayouts] = useState<Payout[]>(initialPayouts || [])
   const [filter, setFilter] = useState<DateFilter>("All Time")
+
+  const safeFormatDate = (iso: string | null | undefined, options?: Intl.DateTimeFormatOptions) => {
+    if (!iso) return "—"
+    const d = new Date(iso)
+    if (isNaN(d.getTime())) return "—"
+    return d.toLocaleDateString("en-IN", options || { day: 'numeric', month: 'short', year: 'numeric' })
+  }
   
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isRequesting, setIsRequesting] = useState(false)
@@ -64,7 +71,11 @@ export function EarningsClient({ initialTasks, initialPayouts, employeeName, emp
     const days = filter === "30 Days" ? 30 : filter === "60 Days" ? 60 : 90
     const limit = now - (days * 24 * 60 * 60 * 1000)
     
-    return normalized.filter(t => new Date(t.completed_at).getTime() >= limit)
+    return normalized.filter(t => {
+      const d = new Date(t.completed_at)
+      if (isNaN(d.getTime())) return true // Fallback to keep it if date is completely unparseable
+      return d.getTime() >= limit
+    })
   }, [tasks, filter])
 
   // Filter payouts
@@ -74,7 +85,12 @@ export function EarningsClient({ initialTasks, initialPayouts, employeeName, emp
     const days = filter === "30 Days" ? 30 : filter === "60 Days" ? 60 : 90
     const limit = now - (days * 24 * 60 * 60 * 1000)
     
-    return payouts.filter(p => p.requested_at && new Date(p.requested_at).getTime() >= limit)
+    return payouts.filter(p => {
+      if (!p.requested_at) return false
+      const d = new Date(p.requested_at)
+      if (isNaN(d.getTime())) return true
+      return d.getTime() >= limit
+    })
   }, [payouts, filter])
 
   // Formulas
@@ -136,7 +152,7 @@ export function EarningsClient({ initialTasks, initialPayouts, employeeName, emp
   }
 
   const executeAction = (action: 'email' | 'whatsapp', totalAmount: number, tasksIncluded: Task[]) => {
-    const dateStr = new Date().toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })
+    const dateStr = safeFormatDate(new Date().toISOString(), { year: 'numeric', month: 'long', day: 'numeric' })
     
     if (action === 'email') {
       const subject = encodeURIComponent(`Payout Request — ${employeeName}`)
@@ -188,7 +204,7 @@ ${employeeName}`
         </div>
 
         {/* Date Filters */}
-        <div className="flex items-center gap-1.5 p-1 bg-input border border-border rounded-full w-fit">
+        <div className="flex items-center gap-1.5 p-1 bg-input border border-border rounded-full w-full sm:w-fit overflow-x-auto mobile-scroll-x">
           {(["30 Days", "60 Days", "90 Days", "All Time"] as DateFilter[]).map((f) => {
             const isActive = filter === f
             return (
@@ -201,7 +217,7 @@ ${employeeName}`
               >
                 {isActive && (
                   <motion.div
-                    layoutId="filter-pill"
+                    layoutId="earnings-filter-pill"
                     className="absolute inset-0 bg-primary/20 border border-primary/30 rounded-full shadow-luxury-glow"
                     transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
                   />
@@ -214,7 +230,7 @@ ${employeeName}`
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
         {[
           { label: "Total Earned", value: `₹${totalEarned.toLocaleString('en-IN')}`, icon: DollarSign, color: "text-white", bg: "bg-white/5", border: "border-white/10" },
           { label: "Paid Out", value: `₹${totalPaid.toLocaleString('en-IN')}`, icon: CheckCircle2, color: "text-emerald-400", bg: "bg-emerald-500/5", border: "border-emerald-500/20" },
@@ -258,7 +274,7 @@ ${employeeName}`
         })}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Completed Tasks Table */}
         <div className="lg:col-span-2 flex flex-col gap-4">
           <div className="glass-card border border-border rounded-2xl overflow-hidden shadow-purple-bloom">
@@ -288,7 +304,7 @@ ${employeeName}`
                       <p className="text-sm font-semibold text-white/90 truncate">{task.title}</p>
                       <p className="text-[11px] text-white/40 mt-0.5 truncate">
                         {task.client?.name || 'No client'} <span className="mx-1.5 opacity-50">•</span> 
-                        {task.completed_at ? new Date(task.completed_at).toLocaleDateString("en-IN", { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
+                        {safeFormatDate(task.completed_at)}
                       </p>
                     </div>
                     <div className="flex flex-col items-end shrink-0 gap-1.5">
@@ -332,7 +348,7 @@ ${employeeName}`
                       <div>
                         <p className="text-base font-bold text-foreground">{formatINR(safeNum(payout.total_amount))}</p>
                         <p className="text-[10px] text-muted-foreground mt-0.5">
-                          Req: {new Date(payout.requested_at).toLocaleDateString("en-IN", { day: 'numeric', month: 'short' })}
+                          Req: {safeFormatDate(payout.requested_at, { day: 'numeric', month: 'short' })}
                         </p>
                       </div>
                       <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border ${
