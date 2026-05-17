@@ -232,7 +232,7 @@ ${employeeName}`
       {/* Summary Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
         {[
-          { label: "Total Earned", value: `₹${totalEarned.toLocaleString('en-IN')}`, icon: DollarSign, color: "text-white", bg: "bg-white/5", border: "border-white/10" },
+          { label: "Total Earned", value: `₹${totalEarned.toLocaleString('en-IN')}`, icon: IndianRupee, color: "text-white", bg: "bg-white/5", border: "border-white/10" },
           { label: "Paid Out", value: `₹${totalPaid.toLocaleString('en-IN')}`, icon: CheckCircle2, color: "text-emerald-400", bg: "bg-emerald-500/5", border: "border-emerald-500/20" },
           { 
             label: "Pending", 
