@@ -109,12 +109,12 @@ export function ProfileSettingsForm({ profile, userId, userEmail }: ProfileSetti
  <div className="flex flex-col gap-5">
 
  {/* ── Avatar Card ── */}
- <div className="enterprise-card p-5 sm:p-6">
+ <div className="enterprise-card p-4 sm:p-6">
  <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-5 flex items-center gap-2">
  <Camera className="w-4 h-4" /> Profile Photo
  </h2>
 
- <div className="flex flex-col sm:flex-row items-center gap-6">
+ <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-6">
  {/* Preview */}
  <div className="relative shrink-0">
  <div
@@ -151,7 +151,7 @@ export function ProfileSettingsForm({ profile, userId, userEmail }: ProfileSetti
  </div>
 
  {/* Controls */}
- <div className="flex flex-col gap-3 flex-1">
+ <div className="flex flex-col gap-3 w-full sm:flex-1">
  <div>
  <p className="text-sm font-semibold text-foreground">{profile?.full_name || "Your Name"}</p>
  <p className="text-xs text-muted-foreground mt-0.5">{userEmail}</p>
@@ -161,11 +161,11 @@ export function ProfileSettingsForm({ profile, userId, userEmail }: ProfileSetti
  <p className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-1.5">{avatarError}</p>
  )}
 
- <div className="flex flex-wrap gap-2">
+ <div className="flex flex-col sm:flex-row flex-wrap gap-2 w-full">
  <button
  type="button"
  onClick={() => fileInputRef.current?.click()}
- className="flex items-center gap-2 text-xs font-semibold text-foreground bg-muted hover:bg-muted border border-border px-3 py-2 rounded-xl transition-all"
+ className="flex items-center justify-center sm:justify-start gap-2 text-xs font-semibold text-foreground bg-muted hover:bg-muted border border-border px-3 py-2 rounded-xl transition-all w-full sm:w-auto"
  >
  <Upload className="w-3.5 h-3.5" />
  {avatarPreview ? "Change Photo" : "Upload Photo"}
@@ -176,7 +176,7 @@ export function ProfileSettingsForm({ profile, userId, userEmail }: ProfileSetti
  type="button"
  onClick={handleAvatarUpload}
  disabled={uploading}
- className="flex items-center gap-2 text-xs font-bold text-foreground bg-violet-600 hover:bg-violet-500 px-3 py-2 rounded-xl transition-all disabled:opacity-50"
+ className="flex items-center justify-center sm:justify-start gap-2 text-xs font-bold text-foreground bg-violet-600 hover:bg-violet-500 px-3 py-2 rounded-xl transition-all disabled:opacity-50 w-full sm:w-auto"
  >
  {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
  {uploading ? "Uploading…" : "Save Photo"}
@@ -188,7 +188,7 @@ export function ProfileSettingsForm({ profile, userId, userEmail }: ProfileSetti
  type="button"
  onClick={handleRemoveAvatar}
  disabled={uploading}
- className="flex items-center gap-2 text-xs font-semibold text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/15 border border-red-500/20 px-3 py-2 rounded-xl transition-all"
+ className="flex items-center justify-center sm:justify-start gap-2 text-xs font-semibold text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/15 border border-red-500/20 px-3 py-2 rounded-xl transition-all w-full sm:w-auto"
  >
  <Trash2 className="w-3.5 h-3.5" /> Remove
  </button>
@@ -203,7 +203,7 @@ export function ProfileSettingsForm({ profile, userId, userEmail }: ProfileSetti
  <form onSubmit={handleSubmit} className="flex flex-col gap-5">
 
  {/* Personal Info */}
- <div className="enterprise-card p-5 sm:p-6">
+ <div className="enterprise-card p-4 sm:p-6">
  <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-5 flex items-center gap-2">
  <User className="w-4 h-4" /> Personal Information
  </h2>
@@ -243,7 +243,7 @@ export function ProfileSettingsForm({ profile, userId, userEmail }: ProfileSetti
  </div>
 
  {/* Payment Details */}
- <div className="enterprise-card p-5 sm:p-6">
+ <div className="enterprise-card p-4 sm:p-6">
  <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-1 flex items-center gap-2">
  <CreditCard className="w-4 h-4" /> Payment Details
  </h2>
@@ -254,7 +254,7 @@ export function ProfileSettingsForm({ profile, userId, userEmail }: ProfileSetti
  <select
  name="payment_method"
  defaultValue={profile?.payment_method || ""}
- className="w-full bg-muted border border-border rounded-xl px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:border-violet-500/50 transition-all appearance-none"
+ className="w-full bg-muted border border-border rounded-xl px-3.5 py-2.5 text-base sm:text-sm text-foreground focus:outline-none focus:border-violet-500/50 transition-all appearance-none"
  >
  {PAYMENT_METHODS.map(m => (
  <option key={m.value} value={m.value} className="bg-background">{m.label}</option>
@@ -286,14 +286,14 @@ export function ProfileSettingsForm({ profile, userId, userEmail }: ProfileSetti
  </div>
 
  {/* Notes (for admins editing their own notes) */}
- <div className="enterprise-card p-5 sm:p-6">
+ <div className="enterprise-card p-4 sm:p-6">
  <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-4">Notes</h2>
  <textarea
  name="notes"
  defaultValue={profile?.notes || ""}
  rows={3}
  placeholder="Any internal notes (optional)…"
- className="w-full bg-muted border border-border rounded-xl px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-violet-500/50 transition-all resize-none"
+ className="w-full bg-muted border border-border rounded-xl px-3.5 py-2.5 text-base sm:text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-violet-500/50 transition-all resize-none"
  />
  </div>
 
@@ -358,7 +358,7 @@ function FormField({
  defaultValue={defaultValue || ""}
  placeholder={placeholder}
  required={required}
- className={`w-full bg-muted border border-border rounded-xl py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/10 transition-all ${icon ? "pl-9 pr-3.5" : "px-3.5"}`}
+ className={`w-full bg-muted border border-border rounded-xl py-2.5 text-base sm:text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/10 transition-all ${icon ? "pl-9 pr-3.5" : "px-3.5"}`}
  />
  </div>
  </div>
