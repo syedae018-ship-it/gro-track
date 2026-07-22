@@ -6,6 +6,7 @@ import { SidebarProvider } from "@/components/layout/SidebarContext"
 import { motion } from "framer-motion"
 import { usePathname } from "next/navigation"
 import { SWRProvider } from "@/lib/swr-provider"
+import { ReminderCron } from "@/components/shared/ReminderCron"
 
 interface DashboardLayoutClientProps {
  children: React.ReactNode
@@ -25,6 +26,7 @@ export function DashboardLayoutClient({
  return (
  <SWRProvider>
  <SidebarProvider>
+ <ReminderCron />
  <div className="flex h-[100dvh] overflow-hidden bg-background relative">
  <div className="absolute inset-0 bg-hero-glow pointer-events-none opacity-40 mix-blend-screen" />
  <Sidebar user={user} isGuest={isGuest} profile={profile} />

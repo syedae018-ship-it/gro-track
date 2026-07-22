@@ -10,10 +10,10 @@ export function ReminderCron() {
     // Run immediately on mount
     fetch('/api/cron/process-reminders').catch(() => {})
 
-    // Run every 60 seconds
+    // Run every 5 minutes
     const interval = setInterval(() => {
       fetch('/api/cron/process-reminders').catch(() => {})
-    }, 60000)
+    }, 300000)
 
     return () => clearInterval(interval)
   }, [])

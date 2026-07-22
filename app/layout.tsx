@@ -6,7 +6,6 @@ import { PWAProvider } from "@/components/providers/PWAProvider"
 import { NextAuthProvider } from "@/components/providers/NextAuthProvider"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "sonner"
-import { ReminderCron } from "@/components/shared/ReminderCron"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -64,7 +63,6 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <NextAuthProvider>
             <PWAProvider>
-              <ReminderCron />
               {children}
             </PWAProvider>
           </NextAuthProvider>
