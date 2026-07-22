@@ -9,6 +9,13 @@ CREATE TABLE public.profiles (
   avatar_initials TEXT,
   avatar_gradient TEXT,
   is_active BOOLEAN DEFAULT true,
+  notification_settings JSONB DEFAULT '{"deadline_notifications_enabled": false, "default_reminder_timings": []}'::jsonb,
+  employee_id TEXT UNIQUE,
+  email TEXT UNIQUE,
+  designation TEXT,
+  pay_type TEXT,
+  default_rate NUMERIC DEFAULT 0,
+  google_user_id TEXT UNIQUE,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -53,10 +60,28 @@ CREATE TABLE public.tasks (
   priority TEXT CHECK (priority IN ('high','medium','low')) DEFAULT 'medium',
   status TEXT CHECK (status IN ('todo','in_progress','review','completed','approved')) DEFAULT 'todo',
   payment_amount NUMERIC DEFAULT 0,
+  task_pay_type TEXT,
+  task_rate NUMERIC DEFAULT 0,
+  hours_worked NUMERIC DEFAULT 0,
   delivery_link TEXT,
   revision_count INTEGER DEFAULT 0,
   notes TEXT,
   completed_at TIMESTAMPTZ,
+  deadline_notifications_enabled BOOLEAN DEFAULT false,
+  automatic_reminder_timings JSONB DEFAULT '[]'::jsonb,
+  use_global_settings BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 4.5 Task Reminders (NEW)
+CREATE TABLE public.task_reminders (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  owner_id UUID DEFAULT auth.uid() REFERENCES public.profiles(id) ON DELETE CASCADE,
+  task_id UUID REFERENCES public.tasks(id) ON DELETE CASCADE,
+  reminder_time TIMESTAMPTZ NOT NULL,
+  type TEXT CHECK (type IN ('automatic', 'manual')) DEFAULT 'automatic',
+  status TEXT CHECK (status IN ('pending', 'sent', 'cancelled')) DEFAULT 'pending',
+  note TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -87,6 +112,11 @@ CREATE TABLE public.invoices (
   employee_id UUID REFERENCES public.profiles(id),
   pdf_url TEXT,
   amount NUMERIC DEFAULT 0,
+  line_items JSONB DEFAULT '[]'::jsonb,
+  discount NUMERIC DEFAULT 0,
+  tax NUMERIC DEFAULT 0,
+  subtotal NUMERIC DEFAULT 0,
+  notes TEXT,
   status TEXT CHECK (status IN ('draft','sent','paid','overdue')) DEFAULT 'draft',
   generated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -127,6 +157,7 @@ ALTER TABLE public.payments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.invoices ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.activity_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.task_reminders ENABLE ROW LEVEL SECURITY;
 
 -- Profiles: Anyone authenticated can read profiles (needed for dropdowns, etc.)
 CREATE POLICY "Authenticated users can read profiles" ON public.profiles FOR SELECT USING (auth.role() = 'authenticated');
@@ -146,6 +177,10 @@ CREATE POLICY "Admins can manage tasks" ON public.tasks FOR ALL USING ((auth.jwt
 CREATE POLICY "Employees can view assigned tasks" ON public.tasks FOR SELECT USING (assigned_to = auth.uid() OR owner_id = auth.uid());
 CREATE POLICY "Employees can update assigned tasks" ON public.tasks FOR UPDATE USING (assigned_to = auth.uid()) WITH CHECK (assigned_to = auth.uid());
 CREATE POLICY "Employees can insert tasks" ON public.tasks FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
+
+-- Task Reminders
+CREATE POLICY "Admins can manage task reminders" ON public.task_reminders FOR ALL USING ((auth.jwt() -> 'user_metadata' ->> 'role') IN ('admin_ops', 'admin_finance', 'managing_director'));
+CREATE POLICY "Employees can manage own task reminders" ON public.task_reminders FOR ALL USING (owner_id = auth.uid() OR EXISTS (SELECT 1 FROM public.tasks WHERE tasks.id = task_reminders.task_id AND tasks.assigned_to = auth.uid()));
 
 -- Payments
 CREATE POLICY "Admins can manage payments" ON public.payments FOR ALL USING ((auth.jwt() -> 'user_metadata' ->> 'role') IN ('admin_ops', 'admin_finance', 'managing_director'));
@@ -167,6 +202,7 @@ alter publication supabase_realtime add table public.tasks;
 alter publication supabase_realtime add table public.payments;
 alter publication supabase_realtime add table public.profiles;
 alter publication supabase_realtime add table public.notifications;
+alter publication supabase_realtime add table public.task_reminders;
 
 -- TRIGGER FOR AUTO COMPLETION TIMESTAMP
 CREATE OR REPLACE FUNCTION update_completed_at()
@@ -235,3 +271,30 @@ DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
+
+-- 9. Attendance Logs (NEW)
+CREATE TABLE public.attendance_logs (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  employee_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+  check_in TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  check_out TIMESTAMPTZ,
+  duration_minutes INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE public.attendance_logs ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Employees can manage their own attendance logs" 
+  ON public.attendance_logs 
+  USING (auth.uid() = employee_id);
+
+CREATE POLICY "Admins can view all attendance logs"
+  ON public.attendance_logs 
+  FOR SELECT 
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.profiles 
+      WHERE id = auth.uid() 
+        AND role IN ('admin_ops', 'admin_finance', 'managing_director')
+    )
+  );

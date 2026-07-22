@@ -8,14 +8,13 @@ import { AnalyticsSkeleton } from "@/components/shared/Skeletons"
 import { LazyAnalyticsDashboard } from "@/components/lazy"
 import { useRouter } from "next/navigation"
 
-export default function AnalyticsPage() {
-  const [userId, setUserId] = useState<string | undefined>()
-  const router = useRouter()
+import { useSession } from "next-auth/react"
 
-  useEffect(() => {
-    const supabase = createClient()
-    supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id))
-  }, [])
+export default function AnalyticsPage() {
+  const { data: session } = useSession()
+  // @ts-ignore
+  const userId = session?.user?.id as string | undefined
+  const router = useRouter()
 
   const { data: profile } = useProfile(userId)
   const admin = isAdmin(profile?.role || "")
@@ -32,13 +31,14 @@ export default function AnalyticsPage() {
   return (
     <div className="flex flex-col gap-6 w-full">
       <div>
-        <h1 className="text-3xl font-syne font-bold text-white">Analytics</h1>
-        <p className="text-sm text-white/40 mt-1">Agency performance intelligence — employee output, revenue, and operational insights.</p>
+        <h1 className="text-3xl font-syne font-bold text-foreground">Analytics</h1>
+        <p className="text-sm text-muted-foreground mt-1">Agency performance intelligence — employee output, revenue, and operational insights.</p>
       </div>
       <LazyAnalyticsDashboard
         employees={analyticsData.employees}
         tasks={analyticsData.tasks}
         payouts={analyticsData.payouts}
+        attendance={analyticsData.attendance}
       />
     </div>
   )

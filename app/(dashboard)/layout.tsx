@@ -1,5 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
+import { getServerSession } from "next-auth/next"
+import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options"
 import { DashboardLayoutClient } from './DashboardLayoutClient'
 
 export default async function DashboardLayout({
@@ -7,8 +9,9 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const supabase = await createClient()
+  const session = await getServerSession(authOptions)
+  const user = session?.user
   const isGuest = cookies().get('guest_mode')?.value === 'true'
 
   // Fetch full profile for accurate role data

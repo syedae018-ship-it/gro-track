@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useSession } from "next-auth/react"
 import { createClient } from "@/lib/supabase/client"
 import { isAdmin } from "@/lib/utils/roles"
 import { useProfile, useAdminOverview, useEmployeeOverview } from "@/hooks/use-dashboard-data"
@@ -11,12 +12,8 @@ import {
 } from "@/components/lazy"
 
 export default function OverviewPage() {
-  const [userId, setUserId] = useState<string | undefined>()
-
-  useEffect(() => {
-    const supabase = createClient()
-    supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id))
-  }, [])
+  const { data: session, status } = useSession()
+  const userId = session?.user?.id as string | undefined
 
   const { data: profile } = useProfile(userId)
   const role = profile?.role || "employee"
@@ -24,6 +21,9 @@ export default function OverviewPage() {
 
   const { data: adminData } = useAdminOverview(!!userId && admin)
   const { data: empData } = useEmployeeOverview(!admin ? userId : undefined)
+
+  if (status === "loading") return <DashboardSkeleton />
+
 
   if (!userId || !profile) return <DashboardSkeleton />
 
@@ -46,9 +46,11 @@ export default function OverviewPage() {
   if (!empData) return <DashboardSkeleton />
   return (
     <LazyEmployeeDashboard
+      userId={userId}
       userName={profile.full_name || "there"}
       tasksDoneTotal={empData.tasksDoneTotal}
       tasksDoneThisWeek={empData.tasksDoneThisWeek}
+      tasksDoneToday={empData.tasksDoneToday}
       overdueTasks={empData.overdueTasks}
       inReview={empData.inReview}
       inProgress={empData.inProgress}
@@ -58,6 +60,7 @@ export default function OverviewPage() {
       pendingEarnings={empData.pendingEarnings}
       avgTurnaroundHours={empData.avgTurnaroundHours}
       activeTasks={empData.activeTasks}
+      attendanceLogs={empData.attendanceLogs}
     />
   )
 }

@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
 export async function createClientAction(formData: FormData) {
-  const supabase = createClient()
+  const supabase = await createClient()
   
   const name = formData.get('name') as string
   const industry = formData.get('industry') as string

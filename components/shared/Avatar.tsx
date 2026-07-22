@@ -26,7 +26,7 @@ const gradientClasses: Record<AvatarGradient, string> = {
   "pink-rose":     "bg-gradient-to-br from-pink-600 to-rose-500",
   "amber-orange":  "bg-gradient-to-br from-amber-500 to-orange-500",
   "emerald-teal":  "bg-gradient-to-br from-emerald-500 to-teal-500",
-  "none":          "bg-white/10",
+  "none":          "bg-muted",
 }
 
 interface AvatarProps {
@@ -62,7 +62,7 @@ export const Avatar = React.memo(function Avatar({ initials, size = "list", grad
   return (
     <div
       className={cn(
-        "flex items-center justify-center font-syne font-bold text-white shrink-0",
+        "flex items-center justify-center font-syne font-bold text-foreground shrink-0",
         container,
         gradientClasses[gradient],
         className

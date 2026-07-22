@@ -2,10 +2,13 @@
 
 import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
+import { getServerSession } from "next-auth/next"
+import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options"
 
 export async function updateProfile(formData: FormData) {
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const supabase = await createClient()
+  const session = await getServerSession(authOptions)
+  const user = session?.user as any
   if (!user) return { error: "Not authenticated" }
 
   const full_name = (formData.get("full_name") as string)?.trim()
@@ -43,8 +46,9 @@ export async function updateProfile(formData: FormData) {
 }
 
 export async function uploadAvatar(formData: FormData) {
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const supabase = await createClient()
+  const session = await getServerSession(authOptions)
+  const user = session?.user as any
   if (!user) return { error: "Not authenticated" }
 
   const file = formData.get("avatar") as File
@@ -87,8 +91,9 @@ export async function uploadAvatar(formData: FormData) {
 }
 
 export async function removeAvatar() {
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const supabase = await createClient()
+  const session = await getServerSession(authOptions)
+  const user = session?.user as any
   if (!user) return { error: "Not authenticated" }
 
   // Also try to delete the file from storage

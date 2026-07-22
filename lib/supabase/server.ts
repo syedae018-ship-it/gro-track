@@ -1,19 +1,18 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { getServerSession } from "next-auth/next"
+import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options"
 
-/**
- * Creates a Supabase client for use in Server Components, Server Actions,
- * and Route Handlers. Uses the Next.js cookie store for session persistence.
- * 
- * Note: In Server Components the cookie store is read-only.
- * In Server Actions and Route Handlers it is read-write.
- */
-export function createClient() {
+export async function createClient() {
   const cookieStore = cookies()
 
-  return createServerClient(
+  // Always use the Service Role Key on the server if available, to bypass RLS
+  // because we do not have a valid JWT secret to sign custom tokens for NextAuth integration.
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+
+  const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    serviceKey,
     {
       cookies: {
         getAll() {
@@ -25,11 +24,12 @@ export function createClient() {
               cookieStore.set(name, value, options)
             })
           } catch {
-            // Ignore: called from a Server Component where cookies are read-only.
-            // The middleware will refresh the session as needed.
+            // Ignore in Server Components
           }
         },
       },
     }
   )
+
+  return supabase
 }

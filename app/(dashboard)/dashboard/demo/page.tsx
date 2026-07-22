@@ -10,31 +10,31 @@ export default function DemoDashboardPage() {
 
       {/* Mock Analytics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="p-6 rounded-xl border border-white/10 bg-white/5 flex flex-col gap-2">
+        <div className="p-6 rounded-xl border border-border bg-muted flex flex-col gap-2">
           <span className="text-sm text-secondary uppercase tracking-wider">Total Revenue</span>
-          <span className="text-3xl font-bold text-white">$45,231.00</span>
+          <span className="text-3xl font-bold text-foreground">$45,231.00</span>
           <span className="text-xs text-green-400">↑ +12.5% this month</span>
         </div>
-        <div className="p-6 rounded-xl border border-white/10 bg-white/5 flex flex-col gap-2">
+        <div className="p-6 rounded-xl border border-border bg-muted flex flex-col gap-2">
           <span className="text-sm text-secondary uppercase tracking-wider">Active Tasks</span>
-          <span className="text-3xl font-bold text-white">12</span>
+          <span className="text-3xl font-bold text-foreground">12</span>
           <span className="text-xs text-yellow-400">3 due today</span>
         </div>
-        <div className="p-6 rounded-xl border border-white/10 bg-white/5 flex flex-col gap-2">
+        <div className="p-6 rounded-xl border border-border bg-muted flex flex-col gap-2">
           <span className="text-sm text-secondary uppercase tracking-wider">Pending Invoices</span>
-          <span className="text-3xl font-bold text-white">4</span>
+          <span className="text-3xl font-bold text-foreground">4</span>
           <span className="text-xs text-red-400">$12,000 outstanding</span>
         </div>
       </div>
 
       {/* Mock Recent Tasks */}
       <div className="mt-4">
-        <h2 className="text-xl font-bold text-white mb-4">Recent Tasks</h2>
+        <h2 className="text-xl font-bold text-foreground mb-4">Recent Tasks</h2>
         <div className="flex flex-col gap-3">
           {["Design Mockups for Acme Co.", "SEO Audit Report – Phase 1", "Social Media Calendar Q3"].map((task, i) => (
-            <div key={i} className="p-4 rounded-lg border border-white/10 bg-white/5 flex items-center justify-between">
+            <div key={i} className="p-4 rounded-lg border border-border bg-muted flex items-center justify-between">
               <div className="flex flex-col">
-                <span className="text-white font-medium">{task}</span>
+                <span className="text-foreground font-medium">{task}</span>
                 <span className="text-xs text-muted">Due in {i + 2} days</span>
               </div>
               <div className={`px-3 py-1 rounded-full text-xs font-semibold ${

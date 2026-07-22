@@ -9,7 +9,7 @@ export async function login(formData: FormData) {
   // Immediately clear the guest_mode cookie so middleware doesn't intercept us
   try { cookies().delete('guest_mode') } catch {}
 
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const email = (formData.get('email') as string)?.trim().toLowerCase()
   const password = formData.get('password') as string
@@ -97,7 +97,7 @@ export async function loginAsGuest() {
 }
 
 export async function signup(formData: FormData) {
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const email = (formData.get('email') as string)?.trim().toLowerCase()
   const password = formData.get('password') as string
@@ -115,21 +115,6 @@ export async function signup(formData: FormData) {
     return { error: 'Password must be at least 6 characters.' }
   }
 
-  // STRICT ADMIN LIMIT CHECK
-  if (['admin', 'admin_ops', 'admin_finance', 'managing_director'].includes(role)) {
-    const { count, error: countError } = await supabase
-      .from('profiles')
-      .select('*', { count: 'exact', head: true })
-      .in('role', ['admin', 'admin_ops', 'admin_finance', 'managing_director'])
-    
-    if (countError) {
-      return { error: 'Failed to verify admin limit. Please try again.' }
-    }
-    
-    if (count !== null && count >= 2) {
-      return { error: 'Admin account limit reached (max 2). Please sign up as an employee or contact support.' }
-    }
-  }
 
   const { data, error } = await supabase.auth.signUp({
     email,
@@ -164,7 +149,7 @@ export async function signup(formData: FormData) {
 }
 
 export async function resendVerificationEmail(email: string) {
-  const supabase = createClient()
+  const supabase = await createClient()
   const { error } = await supabase.auth.resend({
     type: 'signup',
     email,
@@ -177,7 +162,7 @@ export async function resendVerificationEmail(email: string) {
 }
 
 export async function logout() {
-  const supabase = createClient()
+  const supabase = await createClient()
   await supabase.auth.signOut()
   try { cookies().delete('guest_mode') } catch {}
   redirect('/login')

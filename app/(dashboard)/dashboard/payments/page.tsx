@@ -8,14 +8,13 @@ import { PaymentsSkeleton } from "@/components/shared/Skeletons"
 import { LazyPaymentsDashboard } from "@/components/lazy"
 import { useRouter } from "next/navigation"
 
-export default function PaymentsPage() {
-  const [userId, setUserId] = useState<string | undefined>()
-  const router = useRouter()
+import { useSession } from "next-auth/react"
 
-  useEffect(() => {
-    const supabase = createClient()
-    supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id))
-  }, [])
+export default function PaymentsPage() {
+  const { data: session } = useSession()
+  // @ts-ignore
+  const userId = session?.user?.id as string | undefined
+  const router = useRouter()
 
   const { data: profile } = useProfile(userId)
   const admin = isAdmin(profile?.role || "")
@@ -31,8 +30,8 @@ export default function PaymentsPage() {
   return (
     <div className="flex flex-col gap-6 w-full">
       <div>
-        <h1 className="text-3xl font-syne font-bold text-white">Payments</h1>
-        <p className="text-sm text-white/40 mt-1">
+        <h1 className="text-3xl font-syne font-bold text-foreground">Payments</h1>
+        <p className="text-sm text-muted-foreground mt-1">
           Employee payout tracker — all compensation transactions in one place.
         </p>
       </div>

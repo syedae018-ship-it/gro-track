@@ -7,19 +7,14 @@ import { EarningsSkeleton } from "@/components/shared/Skeletons"
 import { LazyEarningsClient } from "@/components/lazy"
 import { useRouter } from "next/navigation"
 
-export default function EarningsPage() {
-  const [userId, setUserId] = useState<string | undefined>()
-  const [userEmail, setUserEmail] = useState("")
-  const router = useRouter()
+import { useSession } from "next-auth/react"
 
-  useEffect(() => {
-    const supabase = createClient()
-    supabase.auth.getUser().then(({ data }) => {
-      if (!data.user) { router.replace("/auth/login"); return }
-      setUserId(data.user.id)
-      setUserEmail(data.user.email || "")
-    })
-  }, [router])
+export default function EarningsPage() {
+  const { data: session } = useSession()
+  // @ts-ignore
+  const userId = session?.user?.id as string | undefined
+  const userEmail = session?.user?.email || ""
+  const router = useRouter()
 
   const { data: profile } = useProfile(userId)
 

@@ -1,0 +1,24 @@
+-- Migration: Business Specification Upgrade
+
+-- 1. Profiles (Employee Extensions)
+ALTER TABLE public.profiles
+ADD COLUMN IF NOT EXISTS employee_id TEXT UNIQUE,
+ADD COLUMN IF NOT EXISTS email TEXT UNIQUE,
+ADD COLUMN IF NOT EXISTS designation TEXT,
+ADD COLUMN IF NOT EXISTS pay_type TEXT,
+ADD COLUMN IF NOT EXISTS default_rate NUMERIC DEFAULT 0,
+ADD COLUMN IF NOT EXISTS google_user_id TEXT UNIQUE;
+
+-- 2. Tasks (Task Extensions)
+ALTER TABLE public.tasks
+ADD COLUMN IF NOT EXISTS task_pay_type TEXT,
+ADD COLUMN IF NOT EXISTS task_rate NUMERIC DEFAULT 0,
+ADD COLUMN IF NOT EXISTS hours_worked NUMERIC DEFAULT 0;
+
+-- 3. Invoices (Invoice Extensions)
+ALTER TABLE public.invoices
+ADD COLUMN IF NOT EXISTS line_items JSONB DEFAULT '[]'::jsonb,
+ADD COLUMN IF NOT EXISTS discount NUMERIC DEFAULT 0,
+ADD COLUMN IF NOT EXISTS tax NUMERIC DEFAULT 0,
+ADD COLUMN IF NOT EXISTS subtotal NUMERIC DEFAULT 0,
+ADD COLUMN IF NOT EXISTS notes TEXT;

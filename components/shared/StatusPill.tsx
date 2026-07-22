@@ -10,7 +10,7 @@ interface StatusPillProps {
 const statusConfig: Record<TaskStatus, { label: string; className: string }> = {
   todo: {
     label: "To Do",
-    className: "bg-white/10 text-white", // Not strictly specified in prompt, but makes sense
+    className: "bg-muted text-foreground", // Not strictly specified in prompt, but makes sense
   },
   in_progress: {
     label: "In Progress",
