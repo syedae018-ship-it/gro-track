@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useSession } from "next-auth/react"
+import { useAuth } from "@/hooks/use-auth"
 import { createClient } from "@/lib/supabase/client"
 import { isAdmin } from "@/lib/utils/roles"
 import { useProfile, useAdminOverview, useEmployeeOverview } from "@/hooks/use-dashboard-data"
@@ -12,13 +12,12 @@ import {
 } from "@/components/lazy"
 
 export default function OverviewPage() {
-  const { data: session, status } = useSession()
+  const { data: session, status, role } = useAuth()
   const userId = session?.user?.id as string | undefined
 
-  const { data: profile } = useProfile(userId)
-  const role = profile?.role || "employee"
-  const admin = isAdmin(role)
+  const admin = isAdmin(role as string)
 
+  const { data: profile } = useProfile(userId)
   const { data: adminData } = useAdminOverview(!!userId && admin)
   const { data: empData } = useEmployeeOverview(!admin ? userId : undefined)
 

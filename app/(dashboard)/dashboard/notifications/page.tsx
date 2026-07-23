@@ -1,6 +1,5 @@
 "use client"
-import { useSession } from "next-auth/react"
-
+import { useAuth } from "@/hooks/use-auth"
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { useProfile, useNotifications } from "@/hooks/use-dashboard-data"
@@ -293,7 +292,7 @@ export default function NotificationsPage() {
  toast.success("FCM Token copied to clipboard! 📋")
  }
 
-  const { data: session } = useSession()
+  const { data: session } = useAuth()
 
   // Fetch session & profile
   useEffect(() => {

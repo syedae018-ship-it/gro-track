@@ -1,4 +1,7 @@
-'use server'
+"use server"
+
+import { getServerSession } from "next-auth/next"
+import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options"
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
@@ -11,8 +14,9 @@ export async function createClientAction(formData: FormData) {
   const contact_email = formData.get('contact_email') as string
   const status = formData.get('status') as string
 
-  const { data: { user } } = await supabase.auth.getUser()
-
+  const session = await getServerSession(authOptions);
+  const user = session?.user as any;
+  
   if (!user) {
     return { error: 'Not authenticated' }
   }

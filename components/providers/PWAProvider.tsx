@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useState, useRef } from "react"
 import { toast } from "sonner"
 import { createClient } from "@/lib/supabase/client"
+import { useSession } from "next-auth/react"
 import { registerFCMToken } from "@/app/(dashboard)/dashboard/notifications/actions"
 
 interface PWAContextType {
@@ -25,7 +26,8 @@ export function PWAProvider({ children }: { children: React.ReactNode }) {
   const [isIOS, setIsIOS] = useState(false)
   const [isOnline, setIsOnline] = useState(true)
   const [showIOSPrompt, setShowIOSPrompt] = useState(false)
-  const [user, setUser] = useState<any>(null)
+  const { data: session } = useSession()
+  const user = session?.user as any
   const processedNotifIds = useRef<Set<string>>(new Set())
 
   // 1. Check network connection and setup listeners
@@ -121,25 +123,6 @@ export function PWAProvider({ children }: { children: React.ReactNode }) {
     return () => {
       window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt)
       window.removeEventListener("appinstalled", handleAppInstalled)
-    }
-  }, [])
-
-  // 3. User session tracking
-  useEffect(() => {
-    const supabase = createClient()
-    
-    // Get initial session
-    supabase.auth.getUser().then(({ data }) => {
-      setUser(data.user)
-    })
-
-    // Listen to changes in auth
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user || null)
-    })
-
-    return () => {
-      subscription.unsubscribe()
     }
   }, [])
 

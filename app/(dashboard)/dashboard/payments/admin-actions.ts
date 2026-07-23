@@ -1,3 +1,5 @@
+import { getServerSession } from "next-auth/next"
+import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options"
 import { createClient } from "@/lib/supabase/server"
 import { sendGoogleChatWebhook } from "@/lib/notifications/google"
 
@@ -5,8 +7,10 @@ export async function calculatePayroll(employeeId: string, startDate: string, en
   const supabase = await createClient()
   
   // Verify Admin
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: "Not authenticated" }
+  const supabase = await createClient();
+  const session = await getServerSession(authOptions);
+  const user = session?.user as any;
+    if (!user) return { error: "Not authenticated" }
 
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
   if (!profile || !['admin_ops', 'admin_finance', 'managing_director'].includes(profile.role)) {
@@ -53,10 +57,10 @@ export async function calculatePayroll(employeeId: string, startDate: string, en
 }
 
 export async function generatePayrollRecord(employeeId: string, startDate: string, endDate: string, taskIds: string[], totalAmount: number) {
-  const supabase = await createClient()
-  
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: "Not authenticated" }
+  const supabase = await createClient();
+  const session = await getServerSession(authOptions);
+  const user = session?.user as any;
+    if (!user) return { error: "Not authenticated" }
 
   // 1. Create payment/payout record
   const { data: payment, error: pError } = await supabase

@@ -1,5 +1,8 @@
 "use server"
 
+import { getServerSession } from "next-auth/next"
+import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options"
+
 import { createClient } from "@/lib/supabase/server"
 import { isAdmin } from "@/lib/utils/roles"
 import { sendNotification } from "@/lib/notifications/service"
@@ -9,9 +12,10 @@ import { revalidatePath } from "next/cache"
  * Registers / upserts an FCM device token in the database for the active user session.
  */
 export async function registerFCMToken(token: string, deviceType: string) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
+  const supabase = await createClient();
+  const session = await getServerSession(authOptions);
+  const user = session?.user as any;
+  
   if (!user) return { error: "Not authenticated" }
 
   const { error } = await supabase
@@ -41,9 +45,10 @@ export async function registerFCMToken(token: string, deviceType: string) {
  * Unregisters / deletes an FCM token (e.g., when the user logs out or disables notifications).
  */
 export async function unregisterFCMToken(token: string) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
+  const supabase = await createClient();
+  const session = await getServerSession(authOptions);
+  const user = session?.user as any;
+  
   if (!user) return { error: "Not authenticated" }
 
   const { error } = await supabase
@@ -64,9 +69,10 @@ export async function unregisterFCMToken(token: string) {
  * Fetches all registered active employees (for Admin Broadcast selector).
  */
 export async function getEmployeesList() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
+  const supabase = await createClient();
+  const session = await getServerSession(authOptions);
+  const user = session?.user as any;
+  
   if (!user) return []
 
   const { data } = await supabase
@@ -91,8 +97,9 @@ export async function sendAdminNotification(
   const supabase = await createClient()
   
   // 1. Authenticate sender and verify admin roles
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: "Not authenticated" }
+  const session = await getServerSession(authOptions);
+  const user = session?.user as any;
+    if (!user) return { error: "Not authenticated" }
 
   const { data: senderProfile } = await supabase
     .from("profiles")
@@ -126,9 +133,10 @@ export async function sendAdminNotification(
  * Fetches the notifications delivery log (for admin view).
  */
 export async function getNotificationLogs() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
+  const supabase = await createClient();
+  const session = await getServerSession(authOptions);
+  const user = session?.user as any;
+  
   if (!user) return []
 
   const { data: senderProfile } = await supabase
@@ -169,9 +177,10 @@ export async function sendTestPushAction(
   customTitle?: string,
   customBody?: string
 ) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
+  const supabase = await createClient();
+  const session = await getServerSession(authOptions);
+  const user = session?.user as any;
+  
   if (!user) return { error: "Not authenticated" }
 
   // Verify that the token belongs to the user, OR if they are an admin.

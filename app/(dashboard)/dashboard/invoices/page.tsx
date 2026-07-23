@@ -1,11 +1,13 @@
+import { getServerSession } from "next-auth/next"
+import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options"
 import { createClient } from "@/lib/supabase/server"
 import { InvoicesClient } from "./InvoicesClient"
 
 export default async function InvoicesPage() {
-  const supabase = await createClient()
-  
-  const { data: { user } } = await supabase.auth.getUser()
-  const userId = user?.id
+  const supabase = await createClient();
+  const session = await getServerSession(authOptions);
+  const user = session?.user as any;
+    const userId = user?.id
 
   const { data: invoices } = await supabase
     .from('invoices')

@@ -1,17 +1,18 @@
 "use server"
 
 import { createClient } from "@supabase/supabase-js"
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options"
 import { isAdmin } from "@/lib/utils/roles"
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
 // Helper to get a secure admin client and verify the NextAuth session
+import { getServerSession } from "next-auth/next"
+import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options"
+
 const getSecureClient = async () => {
-  const session = await getServerSession(authOptions)
-  if (!session?.user) throw new Error("Unauthorized")
+  const session = await getServerSession(authOptions);
+  if (!session?.user) throw new Error("Unauthorized");
   return { supabase: createClient(supabaseUrl, supabaseServiceKey), user: session.user }
 }
 

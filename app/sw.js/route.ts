@@ -28,12 +28,24 @@ export async function GET() {
       '/icons/icon-512x512.png',
     ];
 
-    // 1. Install Event: cache static shell assets
+    // 1. Install Event: cache static shell assets gracefully
     self.addEventListener('install', (event) => {
       event.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => {
+        caches.open(CACHE_NAME).then(async (cache) => {
           console.log('[SW] Caching static shell assets');
-          return cache.addAll(STATIC_ASSETS);
+          // Cache each asset individually to prevent one failure from crashing the entire SW installation
+          for (const url of STATIC_ASSETS) {
+            try {
+              const response = await fetch(url);
+              if (response.ok) {
+                await cache.put(url, response);
+              } else {
+                console.warn('[SW] Failed to cache asset (non-200):', url);
+              }
+            } catch (err) {
+              console.warn('[SW] Failed to cache asset (network error):', url, err);
+            }
+          }
         }).then(() => self.skipWaiting())
       );
     });

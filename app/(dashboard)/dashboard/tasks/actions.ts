@@ -1,4 +1,7 @@
-'use server'
+"use server"
+
+import { getServerSession } from "next-auth/next"
+import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options"
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
@@ -22,8 +25,9 @@ export async function createTaskAction(formData: FormData) {
   const automatic_reminder_timings = formData.get('automatic_reminder_timings') ? JSON.parse(formData.get('automatic_reminder_timings') as string) : []
   const manual_reminders = formData.get('manual_reminders') ? JSON.parse(formData.get('manual_reminders') as string) : []
 
-  const { data: { user } } = await supabase.auth.getUser()
-
+  const session = await getServerSession(authOptions);
+  const user = session?.user as any;
+  
   if (!user) {
     return { error: 'Not authenticated' }
   }
@@ -86,9 +90,10 @@ export async function quickCompleteTask(
   delivery_link: string,
   notes: string
 ) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
+  const supabase = await createClient();
+  const session = await getServerSession(authOptions);
+  const user = session?.user as any;
+  
   if (!user) return { error: 'Not authenticated' }
 
   // Fetch task info to notify creator
@@ -133,9 +138,10 @@ export async function quickCompleteTask(
 
 // Called by admins — approves task and marks payout pending
 export async function approveTask(taskId: string) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Not authenticated' }
+  const supabase = await createClient();
+  const session = await getServerSession(authOptions);
+  const user = session?.user as any;
+    if (!user) return { error: 'Not authenticated' }
 
   // Fetch the task to get employee and payment amount
   const { data: task, error: fetchError } = await supabase
@@ -190,9 +196,10 @@ export async function approveTask(taskId: string) {
 
 // Allows editing a task's details and automatically rescheduling its reminder notifications
 export async function editTaskAction(taskId: string, formData: FormData) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Not authenticated' }
+  const supabase = await createClient();
+  const session = await getServerSession(authOptions);
+  const user = session?.user as any;
+    if (!user) return { error: 'Not authenticated' }
 
   const title = formData.get('title') as string
   const deadline = formData.get('deadline') as string
@@ -228,9 +235,10 @@ export async function editTaskAction(taskId: string, formData: FormData) {
 }
 
 export async function deleteTaskAction(taskId: string) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Not authenticated' }
+  const supabase = await createClient();
+  const session = await getServerSession(authOptions);
+  const user = session?.user as any;
+    if (!user) return { error: 'Not authenticated' }
 
   // 1. Delete reminders
   const { error: remErr } = await supabase.from('task_reminders').delete().eq('task_id', taskId)

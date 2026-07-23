@@ -10,10 +10,9 @@ import { TaskNotificationSettings } from "@/components/tasks/TaskNotificationSet
 import { motion, AnimatePresence } from "framer-motion"
 import { useRouter } from "next/navigation"
 
-import { useSession } from "next-auth/react"
-
+import { useAuth } from "@/hooks/use-auth"
 export default function EmployeesPage() {
-  const { data: session } = useSession()
+  const { data: session } = useAuth()
   // @ts-ignore
   const userId = session?.user?.id as string | undefined
   const [showSettings, setShowSettings] = useState(false)

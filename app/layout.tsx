@@ -3,9 +3,11 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import { cn } from "@/lib/utils"
 import { PWAProvider } from "@/components/providers/PWAProvider"
-import { NextAuthProvider } from "@/components/providers/NextAuthProvider"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "sonner"
+import { NextAuthProvider } from "@/components/providers/NextAuthProvider"
+import { getServerSession } from "next-auth/next"
+import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -33,11 +35,13 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const session = await getServerSession(authOptions)
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -61,7 +65,7 @@ export default function RootLayout({
         "font-sans antialiased bg-background text-foreground"
       )}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          <NextAuthProvider>
+          <NextAuthProvider session={session}>
             <PWAProvider>
               {children}
             </PWAProvider>

@@ -9,10 +9,9 @@ import { LazyAdminTaskBoard, LazyEmployeeTaskFeed } from "@/components/lazy"
 import { TaskNotificationSettings } from "@/components/tasks/TaskNotificationSettings"
 import { motion, AnimatePresence } from "framer-motion"
 
-import { useSession } from "next-auth/react"
-
+import { useAuth } from "@/hooks/use-auth"
 export default function TasksPage() {
-  const { data: session } = useSession()
+  const { data: session } = useAuth()
   // @ts-ignore
   const userId = session?.user?.id as string | undefined
   const [showSettings, setShowSettings] = useState(false)

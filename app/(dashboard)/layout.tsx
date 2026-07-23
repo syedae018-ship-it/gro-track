@@ -1,32 +1,30 @@
-import { createClient } from '@/lib/supabase/server'
-import { cookies } from 'next/headers'
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options"
+import { getServerSession } from 'next-auth/next'
+import { authOptions } from '@/app/api/auth/[...nextauth]/auth-options'
 import { DashboardLayoutClient } from './DashboardLayoutClient'
+import { redirect } from 'next/navigation'
 
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const supabase = await createClient()
   const session = await getServerSession(authOptions)
-  const user = session?.user
-  const isGuest = cookies().get('guest_mode')?.value === 'true'
 
-  // Fetch full profile for accurate role data
-  let profile = null
-  if (user) {
-    const { data } = await supabase
-      .from('profiles')
-      .select('full_name, role, avatar_url, specialization')
-      .eq('id', user.id)
-      .single()
-    profile = data
+  if (!session?.user) {
+    redirect('/login')
+  }
+
+  // Use NextAuth session as the source of truth for display & role
+  const user = session.user as any
+  const profile = {
+    full_name: user.name || user.email?.split('@')[0],
+    role: user.role || 'employee',
+    avatar_url: user.image || null,
+    specialization: user.designation || null,
   }
 
   return (
-    <DashboardLayoutClient isGuest={isGuest} user={user} profile={profile}>
+    <DashboardLayoutClient isGuest={false} user={user} profile={profile}>
       {children}
     </DashboardLayoutClient>
   )

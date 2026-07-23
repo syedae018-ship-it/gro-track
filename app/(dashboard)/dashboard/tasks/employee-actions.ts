@@ -1,18 +1,19 @@
-'use server'
+"use server"
+
+import { getServerSession } from "next-auth/next"
+import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options"
+
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { sendNotification } from '@/lib/notifications/service'
 import { sendGoogleChatWebhook } from '@/lib/notifications/google'
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options"
-
 /** Employee starts working on a task — records start timestamp */
 export async function startTaskTimer(taskId: string) {
-  const supabase = await createClient()
-  const session = await getServerSession(authOptions)
-  const user = session?.user as any
-  if (!user) return { error: 'Not authenticated' }
+  const supabase = await createClient();
+  const session = await getServerSession(authOptions);
+  const user = session?.user as any;
+    if (!user) return { error: 'Not authenticated' }
 
   // Only update fields that definitely exist in schema
   const { error } = await supabase
@@ -32,10 +33,10 @@ export async function updateAttendanceStatus(
   title?: string,
   message?: string
 ) {
-  const supabase = await createClient()
-  const session = await getServerSession(authOptions)
-  const user = session?.user as any
-  if (!user) return { error: 'Not authenticated' }
+  const supabase = await createClient();
+  const session = await getServerSession(authOptions);
+  const user = session?.user as any;
+    if (!user) return { error: 'Not authenticated' }
 
   const emoji = newStatus === 'checked_in' ? '🟢' : newStatus === 'break' ? '☕' : '🔴'
   const logAction = newStatus === 'checked_in' ? 'check_in' : newStatus === 'break' ? 'break' : 'check_out'
@@ -142,10 +143,10 @@ export async function employeeCompleteTask(
   notes: string,
   localStartedAt?: string
 ) {
-  const supabase = await createClient()
-  const session = await getServerSession(authOptions)
-  const user = session?.user as any
-  if (!user) return { error: 'Not authenticated' }
+  const supabase = await createClient();
+  const session = await getServerSession(authOptions);
+  const user = session?.user as any;
+    if (!user) return { error: 'Not authenticated' }
 
   const now = new Date().toISOString()
   const updateData: Record<string, any> = {
@@ -224,10 +225,10 @@ export async function employeeCreateTask(formData: {
   automatic_reminder_timings?: number[]
   manual_reminders?: { reminder_time: string; note?: string }[]
 }) {
-  const supabase = await createClient()
-  const session = await getServerSession(authOptions)
-  const user = session?.user as any
-  if (!user) return { error: 'Not authenticated' }
+  const supabase = await createClient();
+  const session = await getServerSession(authOptions);
+  const user = session?.user as any;
+    if (!user) return { error: 'Not authenticated' }
 
   const now = new Date().toISOString()
   const isCompleted = formData.status === 'completed'
@@ -329,10 +330,10 @@ export async function fetchClientSuggestions(query: string) {
 // --- REMINDERS MANAGEMENT ACTIONS ---
 
 export async function fetchTaskReminders(taskId: string) {
-  const supabase = await createClient()
-  const session = await getServerSession(authOptions)
-  const user = session?.user as any
-  if (!user) return { error: 'Not authenticated' }
+  const supabase = await createClient();
+  const session = await getServerSession(authOptions);
+  const user = session?.user as any;
+    if (!user) return { error: 'Not authenticated' }
 
   // Check user role
   const { data: profile } = await supabase
@@ -365,10 +366,10 @@ export async function addTaskReminder(
   note?: string,
   ownerId?: string
 ) {
-  const supabase = await createClient()
-  const session = await getServerSession(authOptions)
-  const user = session?.user as any
-  if (!user) return { error: 'Not authenticated' }
+  const supabase = await createClient();
+  const session = await getServerSession(authOptions);
+  const user = session?.user as any;
+    if (!user) return { error: 'Not authenticated' }
 
   // Check user role to see if they can assign reminders to others
   const { data: profile } = await supabase
@@ -398,10 +399,10 @@ export async function addTaskReminder(
 }
 
 export async function deleteTaskReminder(reminderId: string) {
-  const supabase = await createClient()
-  const session = await getServerSession(authOptions)
-  const user = session?.user as any
-  if (!user) return { error: 'Not authenticated' }
+  const supabase = await createClient();
+  const session = await getServerSession(authOptions);
+  const user = session?.user as any;
+    if (!user) return { error: 'Not authenticated' }
 
   const { data: profile } = await supabase
     .from('profiles')

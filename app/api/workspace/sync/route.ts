@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/auth-options';
 import { createClient } from '@/lib/supabase/server';
 import { google } from 'googleapis';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/app/api/auth/[...nextauth]/auth-options';
 
 export async function POST(req: Request) {
   try {
@@ -11,24 +11,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const supabase = await createClient();
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('email', session.user.email)
-      .single();
-
-    if (!profile || !['admin_ops', 'admin_finance', 'managing_director'].includes(profile.role)) {
+    const user = session.user as any;
+    if (!['admin_ops', 'admin_finance', 'managing_director'].includes(user.role)) {
       return NextResponse.json({ error: 'Forbidden: Admins only' }, { status: 403 });
     }
 
     // Attempt to use Google Admin SDK to fetch users
-    // If credentials are not provided, we will mock the sync or throw a clear error
     if (!process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || !process.env.GOOGLE_PRIVATE_KEY) {
       console.warn("Google Workspace credentials missing. Skipping real sync.");
-      // For demonstration, we could return a 501 or just a success message stating it's unconfigured.
       return NextResponse.json({ 
-        message: 'Google Workspace credentials missing in Environment Variables. Please add GOOGLE_SERVICE_ACCOUNT_EMAIL and GOOGLE_PRIVATE_KEY.',
+        message: 'Google Workspace credentials missing in Environment Variables.',
         success: false
       }, { status: 501 });
     }
@@ -49,6 +41,8 @@ export async function POST(req: Request) {
 
     const users = response.data.users || [];
     let syncedCount = 0;
+
+    const supabase = await createClient();
 
     // We need to fetch the highest EMP ID to increment
     const { data: highestEmp } = await supabase
@@ -77,8 +71,6 @@ export async function POST(req: Request) {
 
       if (!existing) {
         // Create new user profile in DB (Syncing)
-        // Note: Supabase Auth will still need to handle them if they login via NextAuth and we rely on Supabase trigger,
-        // BUT we are shifting to NextAuth. So we insert directly into profiles.
         const newEmpId = `EMP-${nextEmpNum.toString().padStart(3, '0')}`;
         
         await supabase.from('profiles').insert({

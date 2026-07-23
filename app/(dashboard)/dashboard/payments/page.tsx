@@ -8,10 +8,9 @@ import { PaymentsSkeleton } from "@/components/shared/Skeletons"
 import { LazyPaymentsDashboard } from "@/components/lazy"
 import { useRouter } from "next/navigation"
 
-import { useSession } from "next-auth/react"
-
+import { useAuth } from "@/hooks/use-auth"
 export default function PaymentsPage() {
-  const { data: session } = useSession()
+  const { data: session } = useAuth()
   // @ts-ignore
   const userId = session?.user?.id as string | undefined
   const router = useRouter()

@@ -1,12 +1,17 @@
 "use server"
 
+import { getServerSession } from "next-auth/next"
+import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options"
+
+
 import { createClient } from "@/lib/supabase/server"
 import { sendNotification } from "@/lib/notifications/service"
 
 export async function requestPayout(taskIds: string[], totalAmount: number) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  
+  const supabase = await createClient();
+  const session = await getServerSession(authOptions);
+  const user = session?.user as any;
+    
   if (!user) return { error: "Not authenticated" }
 
   // 1. Create payout record
@@ -84,9 +89,10 @@ export async function requestPayout(taskIds: string[], totalAmount: number) {
 }
 
 export async function markPayoutAsReceived(payoutId: string) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  
+  const supabase = await createClient();
+  const session = await getServerSession(authOptions);
+  const user = session?.user as any;
+    
   if (!user) return { error: "Not authenticated" }
 
   // Fetch payout details for notifications

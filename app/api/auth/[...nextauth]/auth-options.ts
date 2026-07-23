@@ -1,116 +1,101 @@
 import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
-import jwt from "jsonwebtoken";
 import { createClient } from "@supabase/supabase-js";
+import jwt from "jsonwebtoken";
 
-function getSupabase() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
-  if (!supabaseUrl || !supabaseKey) return null;
-  return createClient(supabaseUrl, supabaseKey);
-}
+// Use service role to bypass RLS during auth checks
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID || "",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+      clientId: process.env.GOOGLE_CLIENT_ID || '',
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
     }),
   ],
   session: {
     strategy: "jwt",
-    maxAge: 8 * 60 * 60, // 8 Hours Session Expiry
   },
   callbacks: {
-    async signIn({ user, account }) {
-      if (account?.provider === "google") {
-        const email = user.email || "";
-        const supabase = getSupabase();
-        
-        if (!supabase) {
-          console.error("Supabase client could not be initialized");
-          return false;
-        }
-        
-        // Temporary allowlist authentication via RPC
-        const { data, error } = await supabase.rpc('get_allowed_user', { lookup_email: email });
-        
-        if (error || !data || data.status !== 'active') {
-          console.error("Error verifying allowed user or inactive:", error);
-          return false;
-        }
+    async signIn({ user, account, profile }) {
+      if (!user.email) return false;
 
-        // Sync user via RPC (this returns the true Supabase UUID)
-        const { data: syncedId, error: syncError } = await supabase.rpc('sync_nextauth_user', {
-          google_email: email,
-          google_name: user.name || '',
-          google_image: user.image || ''
-        });
+      // 1. Verify if user is in allowed_users
+      // We use the service role client to bypass any RLS
+      const { data: allowedUser, error } = await supabase
+        .from('allowed_users')
+        .select('*')
+        .eq('email', user.email)
+        .eq('status', 'active')
+        .maybeSingle();
 
-        if (syncError || !syncedId) {
-          console.error("Error syncing NextAuth user to Supabase:", syncError);
-          return false;
-        }
-        
-        // Attach the real UUID to the user object so it can be passed to JWT
-        user.id = syncedId;
-
-        return true;
+      if (error || !allowedUser) {
+        console.error("User not allowed:", user.email);
+        return '/login?error=AccessDenied';
       }
-      return false;
+
+      // 2. Sync user to auth.users and profiles (to satisfy Foreign Keys for Tasks/Projects)
+      const { data: supabaseUid, error: syncError } = await supabase.rpc('sync_nextauth_user', {
+        google_email: user.email,
+        google_name: user.name || user.email.split('@')[0],
+        google_image: user.image || ''
+      });
+
+      if (syncError) {
+        console.error("Failed to sync NextAuth user to Supabase:", syncError);
+        return false;
+      }
+
+      // Attach the role and UUID so we can put it in the JWT
+      (user as any).role = allowedUser.role;
+      (user as any).designation = allowedUser.designation;
+      (user as any).supabaseUid = supabaseUid;
+
+      return true;
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
-        token.id = user.id; // Now correctly holds the Supabase UUID!
-        token.email = user.email;
-        token.name = user.name;
-        
-        const supabase = getSupabase();
-        if (user.email === 'syed.ae018@gmail.com') {
-          token.role = 'managing_director';
-        } else if (supabase) {
-          // Fetch role from allowed_users
-          const { data } = await supabase.rpc('get_allowed_user', { lookup_email: user.email });
-          if (data && data.status === 'active') {
-            token.role = data.role === 'admin' ? 'managing_director' : data.role;
-          } else {
-            token.role = 'employee';
-          }
-        } else {
-          token.role = 'employee';
-        }
+        token.role = (user as any).role;
+        token.designation = (user as any).designation;
+        token.supabaseUid = (user as any).supabaseUid;
       }
-      
-      // Sign a Supabase token
-      const signingSecret = process.env.SUPABASE_JWT_SECRET;
-      if (signingSecret) {
-        const payload = {
-          aud: "authenticated",
-          exp: Math.floor(new Date(token.exp as number).getTime()),
-          sub: token.id,
-          email: token.email,
-          role: "authenticated",
-        };
-        token.supabaseAccessToken = jwt.sign(payload, signingSecret);
+
+      // We need to encode a Supabase-compatible JWT using our SUPABASE_JWT_SECRET
+      if (process.env.SUPABASE_JWT_SECRET && token.supabaseUid && !token.supabaseAccessToken) {
+        token.supabaseAccessToken = jwt.sign(
+          {
+            aud: "authenticated",
+            exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24), // 24 hours
+            sub: token.supabaseUid,
+            email: token.email,
+            role: "authenticated",
+            user_metadata: {
+              role: token.role,
+              designation: token.designation,
+              full_name: token.name,
+              avatar_url: token.picture
+            }
+          },
+          process.env.SUPABASE_JWT_SECRET
+        );
       }
-      
+
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
-        // @ts-ignore
-        session.user.id = token.id;
-        // @ts-ignore
-        session.user.role = token.role;
-        // @ts-ignore
-        session.supabaseAccessToken = token.supabaseAccessToken;
+        (session.user as any).role = token.role;
+        (session.user as any).designation = token.designation;
+        (session.user as any).id = token.supabaseUid; // Use the Supabase UUID as the ID
       }
+      (session as any).supabaseAccessToken = token.supabaseAccessToken;
       return session;
-    },
+    }
   },
   pages: {
-    signIn: '/login',
-    error: '/login', 
-  },
-  secret: process.env.NEXTAUTH_SECRET,
+    signIn: "/login",
+    error: "/login"
+  }
 };

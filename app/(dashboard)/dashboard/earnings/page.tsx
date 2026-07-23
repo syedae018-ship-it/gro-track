@@ -7,10 +7,9 @@ import { EarningsSkeleton } from "@/components/shared/Skeletons"
 import { LazyEarningsClient } from "@/components/lazy"
 import { useRouter } from "next/navigation"
 
-import { useSession } from "next-auth/react"
-
+import { useAuth } from "@/hooks/use-auth"
 export default function EarningsPage() {
-  const { data: session } = useSession()
+  const { data: session } = useAuth()
   // @ts-ignore
   const userId = session?.user?.id as string | undefined
   const userEmail = session?.user?.email || ""
