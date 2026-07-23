@@ -12,23 +12,22 @@ import { useRouter } from "next/navigation"
 
 import { useAuth } from "@/hooks/use-auth"
 export default function EmployeesPage() {
-  const { data: session } = useAuth()
+  const { data: session, role } = useAuth()
   // @ts-ignore
   const userId = session?.user?.id as string | undefined
   const [showSettings, setShowSettings] = useState(false)
   const [syncing, setSyncing] = useState(false)
   const router = useRouter()
 
-  const { data: profile } = useProfile(userId)
-  const admin = isAdmin(profile?.role || "")
+  const admin = isAdmin(role as string)
 
   useEffect(() => {
-    if (profile && !admin) router.replace("/dashboard/overview")
-  }, [profile, admin, router])
+    if (userId && !admin) router.replace("/dashboard/overview")
+  }, [userId, admin, router])
 
   const { data: empData } = useEmployeesPage(!!userId && admin)
 
-  if (!userId || !profile || !empData) return <EmployeeGridSkeleton />
+  if (!userId || !empData) return <EmployeeGridSkeleton />
 
   return (
     <div className="flex flex-col gap-6 w-full">

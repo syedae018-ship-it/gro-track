@@ -11,19 +11,17 @@ import { motion, AnimatePresence } from "framer-motion"
 
 import { useAuth } from "@/hooks/use-auth"
 export default function TasksPage() {
-  const { data: session } = useAuth()
+  const { data: session, role } = useAuth()
   // @ts-ignore
   const userId = session?.user?.id as string | undefined
+  const userName = session?.user?.name || "Creator"
   const [showSettings, setShowSettings] = useState(false)
 
-  const { data: profile } = useProfile(userId)
-  const role = profile?.role || "employee"
-  const admin = isAdmin(role)
-  const userName = profile?.full_name || "Creator"
+  const admin = isAdmin(role as string)
 
-  const { data: tasksData } = useTasksPage(userId, role)
+  const { data: tasksData } = useTasksPage(userId, role as string)
 
-  if (!userId || !profile || !tasksData) {
+  if (!userId || !tasksData) {
     return admin ? <TaskBoardSkeleton /> : <TaskFeedSkeleton />
   }
 

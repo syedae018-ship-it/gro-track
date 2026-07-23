@@ -39,7 +39,6 @@ export function DashboardLayoutClient({
  <Topbar user={user} isGuest={isGuest} profile={profile} />
  <main className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 pb-8 pt-2 relative will-change-scroll overscroll-contain">
  <motion.div
- key={pathname}
  initial={{ opacity: 0 }}
  animate={{ opacity: 1 }}
  transition={{ duration: 0.12, ease: "easeOut" }}

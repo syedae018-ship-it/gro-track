@@ -9,28 +9,27 @@ import { useRouter } from "next/navigation"
 
 import { useAuth } from "@/hooks/use-auth"
 export default function EarningsPage() {
-  const { data: session } = useAuth()
+  const { data: session, role } = useAuth()
   // @ts-ignore
   const userId = session?.user?.id as string | undefined
   const userEmail = session?.user?.email || ""
+  const userName = session?.user?.name || "Employee"
   const router = useRouter()
-
-  const { data: profile } = useProfile(userId)
 
   // Only employees can access
   useEffect(() => {
-    if (profile && profile.role !== "employee") router.replace("/dashboard")
-  }, [profile, router])
+    if (userId && role !== "employee") router.replace("/dashboard/overview")
+  }, [userId, role, router])
 
   const { data: earningsData } = useEarningsPage(userId)
 
-  if (!userId || !profile || !earningsData) return <EarningsSkeleton />
+  if (!userId || !earningsData) return <EarningsSkeleton />
 
   return (
     <LazyEarningsClient
       initialTasks={earningsData.tasks as any[]}
       initialPayouts={earningsData.payouts}
-      employeeName={profile.full_name || "Employee"}
+      employeeName={userName}
       employeeEmail={userEmail}
       employeeId={userId}
     />
