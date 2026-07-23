@@ -1,11 +1,30 @@
 "use server"
 
-import { createClient } from "@/lib/supabase/server"
+import { createClient as createSupabaseClient } from "@supabase/supabase-js"
+import { getServerSession } from "next-auth/next"
+import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options"
 import { revalidatePath } from "next/cache"
+import { isAdmin } from "@/lib/utils/roles"
+
+// Helper to secure admin actions and bypass RLS for allowed_users
+async function getAdminClient() {
+  const session = await getServerSession(authOptions)
+  const role = (session?.user as any)?.role
+  
+  if (!session || !isAdmin(role)) {
+    throw new Error("Unauthorized: Admin access required")
+  }
+
+  return createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+}
 
 export async function getAllowedUsers() {
-  const supabase = await createClient()
-  const { data, error } = await supabase
+  try {
+    const supabase = await getAdminClient()
+    const { data, error } = await supabase
     .from("allowed_users")
     .select("*")
     .order("created_at", { ascending: false })
@@ -15,6 +34,10 @@ export async function getAllowedUsers() {
     return []
   }
   return data
+  } catch (error) {
+    console.error("Auth error in getAllowedUsers:", error)
+    return []
+  }
 }
 
 export async function addAllowedUser(formData: FormData) {
@@ -30,9 +53,10 @@ export async function addAllowedUser(formData: FormData) {
   // Convert 'admin' to 'managing_director' to bypass constraint mismatch
   const mappedRole = role === 'admin' ? 'managing_director' : role;
 
-  const supabase = await createClient()
-  
-  const { error } = await supabase.from("allowed_users").insert({
+  try {
+    const supabase = await getAdminClient()
+    
+    const { error } = await supabase.from("allowed_users").insert({
     email,
     full_name,
     role: mappedRole,
@@ -50,11 +74,16 @@ export async function addAllowedUser(formData: FormData) {
 
   revalidatePath("/dashboard/access")
   return { success: true }
+  } catch (err: any) {
+    console.error("Auth error in addAllowedUser:", err)
+    return { success: false, error: err.message || "Failed to add user" }
+  }
 }
 
 export async function updateAllowedUserStatus(id: string, status: 'active' | 'inactive') {
-  const supabase = await createClient()
-  const { error } = await supabase
+  try {
+    const supabase = await getAdminClient()
+    const { error } = await supabase
     .from("allowed_users")
     .update({ status })
     .eq("id", id)
@@ -66,12 +95,17 @@ export async function updateAllowedUserStatus(id: string, status: 'active' | 'in
 
   revalidatePath("/dashboard/access")
   return { success: true }
+  } catch (err: any) {
+    console.error("Auth error in updateAllowedUserStatus:", err)
+    return { success: false, error: err.message || "Failed to update status" }
+  }
 }
 
 export async function updateAllowedUserRole(id: string, role: string) {
-  const supabase = await createClient()
-  
-  // Convert 'admin' to 'managing_director' to bypass constraint mismatch
+  try {
+    const supabase = await getAdminClient()
+    
+    // Convert 'admin' to 'managing_director' to bypass constraint mismatch
   const mappedRole = role === 'admin' ? 'managing_director' : role;
 
   // Get the email for this allowed_user
@@ -94,11 +128,16 @@ export async function updateAllowedUserRole(id: string, role: string) {
 
   revalidatePath("/dashboard/access")
   return { success: true }
+  } catch (err: any) {
+    console.error("Auth error in updateAllowedUserRole:", err)
+    return { success: false, error: err.message || "Failed to update role" }
+  }
 }
 
 export async function removeAllowedUser(id: string) {
-  const supabase = await createClient()
-  const { error } = await supabase
+  try {
+    const supabase = await getAdminClient()
+    const { error } = await supabase
     .from("allowed_users")
     .delete()
     .eq("id", id)
@@ -110,4 +149,8 @@ export async function removeAllowedUser(id: string) {
 
   revalidatePath("/dashboard/access")
   return { success: true }
+  } catch (err: any) {
+    console.error("Auth error in removeAllowedUser:", err)
+    return { success: false, error: err.message || "Failed to remove user" }
+  }
 }
